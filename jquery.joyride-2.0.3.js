@@ -29,14 +29,25 @@
       'cookieName'           : 'joyride', // Name the cookie you'll use
       'cookieDomain'         : false,     // Will this cookie be attached to a domain, ie. '.notableapp.com'
       'tipContainer'         : 'body',    // Where will the tip be attached
+      'modal'                : false,     // Whether to cover page with modal during the tour
+      'expose'               : false,     // Whether to expose the elements at each step in the tour (requires modal:true)
+      'preRideCallback'      : $.noop,    // A method to call before the tour starts
       'postRideCallback'     : $.noop,    // A method to call once the tour closes (canceled or complete)
+      'preStepCallback'      : $.noop,    // A method to call before each step
       'postStepCallback'     : $.noop,    // A method to call after each step
       'template' : { // HTML segments for tip layout
         'link'    : '<a href="#close" class="joyride-close-tip">X</a>',
         'timer'   : '<div class="joyride-timer-indicator-wrap"><span class="joyride-timer-indicator"></span></div>',
         'tip'     : '<div class="joyride-tip-guide"><span class="joyride-nub"></span></div>',
+<<<<<<< HEAD
         'wrapper' : '<div class="joyride-content-wrapper" role="dialog"></div>',
         'button'  : '<a href="#" class="joyride-next-tip"></a>'
+=======
+        'wrapper' : '<div class="joyride-content-wrapper"></div>',
+        'button'  : '<a href="#" class="joyride-next-tip"></a>',
+        'modal'   : '<div class="joyride-modal-bg"></div>',
+        'expose'  : '<div class="joyride-expose-wrapper"><div class="joyride-expose-cover"></div></div>'
+>>>>>>> c15d1ae... Added a modal background option, and an expose feature to expose elements on the tour
       }
     },
 
@@ -57,6 +68,7 @@
             settings.$document = $(settings.document);
             settings.$window = $(window);
             settings.$content_el = $(this);
+            settings.$body = $(settings.tipContainer);
             settings.body_offset = $(settings.tipContainer).position();
             settings.$tip_content = $('> li', settings.$content_el);
             settings.paused = false;
@@ -230,6 +242,17 @@
           settings.attempts = 0;
 
           if (settings.$li.length && settings.$target.length > 0) {
+            if(init){ //run when we first start
+                settings.preRideCallback(settings.$li.index(), settings.$next_tip );
+                if(settings.modal){
+                    methods.show_modal();
+                }
+            }
+            settings.preStepCallback(settings.$li.index(), settings.$next_tip );
+            if(settings.modal && settings.expose){
+              methods.expose();
+            }
+
             opts_arr = (settings.$li.data('options') || ':').split(';');
             opts_len = opts_arr.length;
 
@@ -329,9 +352,14 @@
       },
 
       hide : function () {
-        settings.postStepCallback(settings.$li.index(), settings.$current_tip);
-        $('.joyride-modal-bg').hide();
+        if(settings.modal && settings.expose){
+          methods.un_expose();
+        }
+        if(!settings.modal){
+          $('.joyride-modal-bg').hide();
+        }
         settings.$current_tip.hide();
+        settings.postStepCallback(settings.$li.index(), settings.$current_tip);
       },
 
       set_li : function (init) {
@@ -541,15 +569,84 @@
         methods.center();
         $nub.hide();
 
+        methods.show_modal();
+
+      },
+
+      show_modal : function() {
         if ($('.joyride-modal-bg').length < 1) {
-          $('body').append('<div class="joyride-modal-bg">').show();
+            $('body').append(settings.template.modal).show();
         }
 
         if (/pop/i.test(settings.tipAnimation)) {
-          $('.joyride-modal-bg').show();
+            $('.joyride-modal-bg').show();
         } else {
-          $('.joyride-modal-bg').fadeIn(settings.tipAnimationFadeSpeed);
+            $('.joyride-modal-bg').fadeIn(settings.tipAnimationFadeSpeed);
         }
+      },
+
+      expose: function(){
+        var expose,
+          exposeCover,
+          el,
+          $element,
+          randId = 'expose-'+Math.floor(Math.random()*10000);
+        if(settings.$target && !/body/i.test(settings.$target.selector)){
+          el = settings.$target;
+        } else if (arguments.length>0 && arguments[0] instanceof $){
+          el = arguments[0];
+        } else {
+          return false;
+        }
+        $element = el.clone();
+        expose = $(settings.template.expose).css({
+
+        });
+        settings.$body.append(expose);
+        //get rid of display:none so I can get/set dimensions
+        expose.css('visibility','hidden');
+        expose.show();
+        expose.css({
+          top: el.offset().top,
+          left: el.offset().left,
+          width: el.outerWidth(true),
+          height: el.outerHeight(true)
+        });
+        expose.append($element);
+        exposeCover = $('.joyride-expose-cover', expose);
+        exposeCover.css({
+          width: el.outerWidth(true),
+          height: el.outerHeight(true)
+        });
+        expose.css('visibility','visible');
+        expose.attr('id',randId);
+        el.data('expose', randId);
+      },
+
+      un_expose: function(){
+        var exposeId,
+          el,
+          expose ,
+          clearAll = false;
+        if(settings.$target && !/body/i.test(settings.$target.selector)){
+          el = settings.$target;
+        } else if (arguments.length>0 && arguments[0] instanceof $){
+          el = arguments[0];
+        } else {
+          return false;
+        }
+        exposeId = el.data('expose');
+        expose = $('#'+exposeId);
+        if(arguments.length>1){
+          clearAll = arguments[1];
+        }
+        if(clearAll === true){
+          $('.expose').remove();
+        } else {
+          expose.remove();
+        }
+        el.removeData('expose');
+
       },
 
       center : function () {
