@@ -132,6 +132,10 @@
             });
 
             settings.$window.bind('resize.joyride', function (e) {
+              if(settings.modal && settings.expose){
+                methods.un_expose();
+                methods.expose();
+              }
               if (methods.is_phone()) {
                 methods.pos_phone();
               } else {
