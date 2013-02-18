@@ -48,8 +48,13 @@
         'button'  : '<a href="#" class="joyride-next-tip"></a>',
         'modal'   : '<div class="joyride-modal-bg"></div>',
 <<<<<<< HEAD
+<<<<<<< HEAD
         'expose'  : '<div class="joyride-expose-wrapper"><div class="joyride-expose-cover"></div></div>'
 >>>>>>> c15d1ae... Added a modal background option, and an expose feature to expose elements on the tour
+=======
+        'expose'  : '<div class="joyride-expose-wrapper"></div>',
+        'exposeCover': '<div class="joyride-expose-cover"></div>'
+>>>>>>> fd8e6ca... A few more tweeks after working out issues with implementation
 =======
         'expose'  : '<div class="joyride-expose-wrapper"></div>',
         'exposeCover': '<div class="joyride-expose-cover"></div>'
@@ -697,6 +702,7 @@
         el.removeData('expose-z-index');
         methods.remove_exposed(el);
       },
+<<<<<<< HEAD
 
       add_exposed: function(el){
         settings.exposed = settings.exposed || [];
@@ -707,6 +713,18 @@
         }
       },
 
+=======
+
+      add_exposed: function(el){
+        settings.exposed = settings.exposed || [];
+        if(el instanceof $){
+          settings.exposed.push(el[0]);
+        } else if(typeof el == 'string'){
+          settings.exposed.push(el);
+        }
+      },
+
+>>>>>>> fd8e6ca... A few more tweeks after working out issues with implementation
       remove_exposed: function(el){
         var search;
         if(el instanceof $){
