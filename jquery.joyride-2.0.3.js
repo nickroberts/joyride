@@ -31,7 +31,8 @@
       'tipContainer'         : 'body',    // Where will the tip be attached
       'modal'                : false,     // Whether to cover page with modal during the tour
       'expose'               : false,     // Whether to expose the elements at each step in the tour (requires modal:true)
-      'preRideCallback'      : $.noop,    // A method to call before the tour starts
+      'postExposeCallback'   : $.noop,    // A method to call after an element has been exposed
+      'preRideCallback'      : $.noop,    // A method to call before the tour starts (passed index, tip, and cloned exposed element)
       'postRideCallback'     : $.noop,    // A method to call once the tour closes (canceled or complete)
       'preStepCallback'      : $.noop,    // A method to call before each step
       'postStepCallback'     : $.noop,    // A method to call after each step
@@ -46,8 +47,13 @@
         'wrapper' : '<div class="joyride-content-wrapper"></div>',
         'button'  : '<a href="#" class="joyride-next-tip"></a>',
         'modal'   : '<div class="joyride-modal-bg"></div>',
+<<<<<<< HEAD
         'expose'  : '<div class="joyride-expose-wrapper"><div class="joyride-expose-cover"></div></div>'
 >>>>>>> c15d1ae... Added a modal background option, and an expose feature to expose elements on the tour
+=======
+        'expose'  : '<div class="joyride-expose-wrapper"></div>',
+        'exposeCover': '<div class="joyride-expose-cover"></div>'
+>>>>>>> fd8e6ca... A few more tweeks after working out issues with implementation
       }
     },
 
@@ -132,9 +138,13 @@
             });
 
             settings.$window.bind('resize.joyride', function (e) {
-              if(settings.modal && settings.expose){
-                methods.un_expose();
-                methods.expose();
+              if(settings.exposed && settings.exposed.length>0){
+                var $els = $(settings.exposed);
+                $els.each(function(){
+                  var $this = $(this);
+                  methods.un_expose($this);
+                  methods.expose($this);
+                });
               }
               if (methods.is_phone()) {
                 methods.pos_phone();
@@ -453,6 +463,7 @@
         var half_fold = Math.ceil(settings.$window.height() / 2),
             tip_position = settings.$next_tip.offset(),
             $nub = $('.joyride-nub', settings.$next_tip),
+            nub_width = Math.ceil($nub.outerWidth() / 2),
             nub_height = Math.ceil($nub.outerHeight() / 2),
             toggle = init || false;
 
@@ -483,7 +494,7 @@
 
               settings.$next_tip.css({
                 top: settings.$target.offset().top,
-                left: (settings.$target.outerWidth() + settings.$target.offset().left)});
+                left: (settings.$target.outerWidth() + settings.$target.offset().left + nub_width)});
 
               methods.nub_position($nub, settings.tipSettings.nubPosition, 'left');
 
@@ -491,7 +502,7 @@
 
               settings.$next_tip.css({
                 top: settings.$target.offset().top,
-                left: (settings.$target.offset().left - settings.$next_tip.outerWidth() - nub_height)});
+                left: (settings.$target.offset().left - settings.$next_tip.outerWidth() - nub_width)});
 
               methods.nub_position($nub, settings.tipSettings.nubPosition, 'right');
 
@@ -593,64 +604,123 @@
         var expose,
           exposeCover,
           el,
-          $element,
+          origCSS,
           randId = 'expose-'+Math.floor(Math.random()*10000);
-        if(settings.$target && !/body/i.test(settings.$target.selector)){
-          el = settings.$target;
-        } else if (arguments.length>0 && arguments[0] instanceof $){
+        if (arguments.length>0 && arguments[0] instanceof $){
           el = arguments[0];
-        } else {
+        } else if(settings.$target && !/body/i.test(settings.$target.selector)){
+          el = settings.$target;
+        }  else {
           return false;
         }
-        $element = el.clone();
-        expose = $(settings.template.expose).css({
-
-        });
+        if(el.length < 1){
+          if(window.console){
+            console.error('element not valid', el);
+          }
+          return false;
+        }
+        expose = $(settings.template.expose);
         settings.$body.append(expose);
-        //get rid of display:none so I can get/set dimensions
-        expose.css('visibility','hidden');
-        expose.show();
         expose.css({
           top: el.offset().top,
           left: el.offset().left,
           width: el.outerWidth(true),
           height: el.outerHeight(true)
         });
-        expose.append($element);
-        exposeCover = $('.joyride-expose-cover', expose);
+        exposeCover = $(settings.template.exposeCover);
+        origCSS = {
+                  zIndex: el.css('z-index'),
+                  position: el.css('position')
+                  };
+        el.css('z-index',expose.css('z-index')*1+1);
+        if(origCSS.position == 'static'){
+          el.css('position','relative');
+        }
+        el.data('expose-css',origCSS);
         exposeCover.css({
+          top: el.offset().top,
+          left: el.offset().left,
           width: el.outerWidth(true),
           height: el.outerHeight(true)
         });
-        expose.css('visibility','visible');
-        expose.attr('id',randId);
+        settings.$body.append(exposeCover);
+        expose.addClass(randId);
+        exposeCover.addClass(randId);
         el.data('expose', randId);
+        settings.postExposeCallback(settings.$li.index(), settings.$next_tip, el);
+        methods.add_exposed(el);
       },
 
       un_expose: function(){
         var exposeId,
           el,
           expose ,
+          origCSS,
           clearAll = false;
-        if(settings.$target && !/body/i.test(settings.$target.selector)){
-          el = settings.$target;
-        } else if (arguments.length>0 && arguments[0] instanceof $){
+        if (arguments.length>0 && arguments[0] instanceof $){
           el = arguments[0];
-        } else {
+        } else if(settings.$target && !/body/i.test(settings.$target.selector)){
+          el = settings.$target;
+        }  else {
+          return false;
+        }
+        if(el.length < 1){
+          if(window.console){
+            console.error('element not valid', el);
+          }
           return false;
         }
         exposeId = el.data('expose');
-        expose = $('#'+exposeId);
+        expose = $('.'+exposeId);
         if(arguments.length>1){
           clearAll = arguments[1];
         }
         if(clearAll === true){
-          $('.expose').remove();
+          $('.joyride-expose-wrapper,.joyride-expose-cover').remove();
         } else {
           expose.remove();
         }
+        origCSS = el.data('expose-css');
+        if(origCSS.zIndex == 'auto'){
+          el.css('z-index', '');
+        } else {
+          el.css('z-index',origCSS.zIndex);
+        }
+        if(origCSS.position != el.css('position')){
+          if(origCSS.position == 'static'){// this is default, no need to set it.
+            el.css('position', '');
+          } else {
+            el.css('position',origCSS.position);
+          }
+        }
         el.removeData('expose');
+        el.removeData('expose-z-index');
+        methods.remove_exposed(el);
+      },
 
+      add_exposed: function(el){
+        settings.exposed = settings.exposed || [];
+        if(el instanceof $){
+          settings.exposed.push(el[0]);
+        } else if(typeof el == 'string'){
+          settings.exposed.push(el);
+        }
+      },
+
+      remove_exposed: function(el){
+        var search;
+        if(el instanceof $){
+          search = el[0]
+        } else if (typeof el == 'string'){
+          search = el;
+        }
+        settings.exposed = settings.exposed || [];
+        for(var i=0; i<settings.exposed.length; i++){
+          if(settings.exposed[i] == search){
+            settings.exposed.splice(i,1);
+            return;
+          }
+        }
       },
 
       center : function () {
@@ -682,14 +752,30 @@
 
       corners : function (el) {
         var w = settings.$window,
+            window_half = w.height() / 2,
+            tipOffset = Math.ceil(settings.$target.offset().top - window_half + settings.$next_tip.outerHeight()),//using this to calculate since scroll may not have finished yet.
             right = w.width() + w.scrollLeft(),
-            bottom = w.width() + w.scrollTop();
+            offsetBottom =  w.height() + tipOffset,
+            bottom = w.height() + w.scrollTop(),
+            top = w.scrollTop();
+
+            if(tipOffset < top){
+              if (tipOffset <0 ){
+                top = 0;
+              } else {
+                top = tipOffset;
+              }
+            }
+
+            if(offsetBottom > bottom){
+              bottom = offsetBottom;
+            }
 
         return [
-          el.offset().top <= w.scrollTop(),
-          right <= el.offset().left + el.outerWidth(),
-          bottom <= el.offset().top + el.outerHeight(),
-          w.scrollLeft() >= el.offset().left
+          el.offset().top < top,
+          right < el.offset().left + el.outerWidth(),
+          bottom < el.offset().top + el.outerHeight(),
+          w.scrollLeft() > el.offset().left
         ];
       },
 
@@ -731,7 +817,9 @@
         if (settings.timer > 0) {
           clearTimeout(settings.automate);
         }
-
+        if(settings.modal && settings.expose){
+          methods.un_expose();
+        }
         $('.joyride-modal-bg').hide();
         settings.$current_tip.hide();
         settings.postStepCallback(settings.$li.index(), settings.$current_tip);
