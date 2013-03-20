@@ -1,0 +1,16 @@
+{
+    "name": "joyride"
+  , "description": "Site tour plugin."
+  , "version": "2.0.3"
+  , "keywords": ["bootstrap", "css"]
+  , "homepage": "https://github.com/nickroberts/joyride"
+  , "repository": {
+      "type": "git"
+    , "url": "https://github.com/nickroberts/joyride.git"
+  }
+  , "devDependencies": {
+      "uglify-js": "1.x"
+    , "jshint": "1.x"
+    , "recess": "1.1.x"
+  }
+}
