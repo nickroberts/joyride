@@ -44,7 +44,7 @@
         'wrapper' : '<div class="joyride-content-wrapper" role="dialog"></div>',
         'modal'   : '<div class="joyride-modal-bg"></div>',
         'expose'  : '<div class="joyride-expose-wrapper"></div>',
-        'exposeCover': '<div class="joyride-expose-cover"></div>'
+        'exposeCover': '<div class="joyride-expose-cover"></div>',
         'prevButton'  : '<a href="#" class="joyride-prev-tip"></a>',
         'nextButton'  : '<a href="#" class="joyride-next-tip"></a>'
       }
