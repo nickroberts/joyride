@@ -155,7 +155,8 @@ body {
 
 /* Button Style */
 .joyride-tip-guide .joyride-next-tip,
-.joyride-tip-guide .joyride-prev-tip {
+.joyride-tip-guide .joyride-prev-tip,
+.joyride-tip-guide .joyride-done-tip {
   width: auto;
   padding: 6px 18px 4px;
   font-size: 13px;
@@ -180,10 +181,23 @@ body {
 }
 
 .joyride-tip-guide .joyride-prev-tip {
+  float: left;
   margin-right: 5px;
 }
 
-.joyride-next-tip:hover {
+.joyride-tip-guide .joyride-next-tip {
+  float: right;
+  margin-left: 5px;
+}
+
+.joyride-tip-guide .joyride-done-tip {
+  display: block;
+  margin-top: 10px;
+}
+
+.joyride-next-tip:hover,
+.joyride-prev-tip:hover,
+.joyride-done-tip:hover {
   color: rgb(255,255,255) !important;
   border: solid 1px rgb(0,60,180) !important;
   background: rgb(43,128,255);

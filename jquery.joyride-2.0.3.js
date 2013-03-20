@@ -20,6 +20,7 @@
     'startOffset': 0, // the index of the tooltip you want to start on (index of the li)
     'prevButton': true, // true or false to control whether a prev button is used
     'nextButton': true, // true or false to control whether a next button is used
+    'doneButton': false, // true or false to control whether a next button is used
     'tipAnimation': 'fade', // 'pop' or 'fade' in each tip
     'pauseAfter': [], // array of indexes where to pause the tour after
     'tipAnimationFadeSpeed': 300, // when tipAnimation = 'fade' this is speed in milliseconds for the transition
@@ -43,7 +44,8 @@
       'expose': '<div class="joyride-expose-wrapper"></div>',
       'exposeCover': '<div class="joyride-expose-cover"></div>',
       'prevButton': '<a href="#" class="joyride-prev-tip"></a>',
-      'nextButton': '<a href="#" class="joyride-next-tip"></a>'
+      'nextButton': '<a href="#" class="joyride-next-tip"></a>',
+      'doneButton': '<a href="#" class="joyride-done-tip"></a>'
     }
   },
 
@@ -141,6 +143,11 @@
 
             });
 
+            settings.$document.on('click.joyride', '.joyride-done-tip', function (e) {
+              e.preventDefault();
+              methods.end();
+            });
+
             settings.$document.on('click.joyride', '.joyride-close-tip', function (e) {
               e.preventDefault();
               methods.end();
@@ -197,6 +204,8 @@
         content = $.trim($(opts.li).html()) +
           methods.prev_button_text(opts.prev_button_text, opts.index) +
           methods.next_button_text(opts.next_button_text) +
+          '<div style="clear: both;"></div>' +
+          methods.done_button_text(opts.done_button_text) +
           settings.template.link +
           methods.timer_instance(opts.index);
 
@@ -245,16 +254,28 @@
         return txt;
       },
 
+      done_button_text: function (txt, index) {
+        if (settings.doneButton) {
+          txt = $.trim(txt) || 'I\'m Finished!';
+          txt = methods.outerHTML($(settings.template.doneButton).append(txt)[0]);
+        } else {
+          txt = '';
+        }
+        return txt;
+      },
+
       create: function (opts) {
         // backwards compatibility with data-text attribute
         var nextButtonText = opts.$li.attr('data-next-button') || opts.$li.attr('data-button') || opts.$li.attr('data-text');
         var prevButtonText = opts.$li.attr('data-prev-button');
+        var doneButtonText = opts.$li.attr('data-done-button');
         var tipClass = opts.$li.attr('class');
         var $tip_content = $(methods.tip_template({
           tip_class: tipClass,
           index: opts.index,
           next_button_text: nextButtonText,
           prev_button_text: prevButtonText,
+          done_button_text: doneButtonText,
           li: opts.$li
         }));
 
