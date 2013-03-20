@@ -196,8 +196,8 @@
 
         $blank = $(settings.template.tip).addClass(opts.tip_class);
         content = $.trim($(opts.li).html()) +
-          methods.prev_button_text(opts.next_button_text, opts.index) +
-          methods.next_button_text(opts.prev_button_text) +
+          methods.prev_button_text(opts.prev_button_text, opts.index) +
+          methods.next_button_text(opts.next_button_text) +
           settings.template.link +
           methods.timer_instance(opts.index);
 
