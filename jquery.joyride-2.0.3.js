@@ -870,7 +870,8 @@
           nub.addClass(pos);
         }
         if(typeof offset !== 'undefined' && parseInt(offset, 10)){
-          nub.css('left', parseInt(nub.css('left').replace('px',''), 10) + parseInt(offset, 10) + 'px');
+          //22 is the default offset of the nub
+          nub.css('left', 22 + parseInt(offset, 10) + 'px');
         }
       },
 
