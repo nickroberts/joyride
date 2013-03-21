@@ -35,6 +35,7 @@
     'postRideCallback': $.noop, // A method to call once the tour closes (canceled or complete)
     'preStepCallback': $.noop, // A method to call before each step
     'postStepCallback': $.noop, // A method to call after each step
+    'edgePadding': 10, // Pixels to leave on window's edge
     'template': { // HTML segments for tip layout
       'link': '<a href="#close" class="joyride-close-tip">X</a>',
       'timer': '<div class="joyride-timer-indicator-wrap"><span class="joyride-timer-indicator"></span></div>',
@@ -511,7 +512,9 @@
           $nub = $('.joyride-nub', settings.$next_tip),
           nub_width = Math.ceil($nub.outerWidth() / 2),
           nub_height = Math.ceil($nub.outerHeight() / 2),
-          toggle = init || false;
+          toggle = init || false,
+          theLeft,
+          offset;
 
         // tip must not be "display: none" to calculate position
         if (toggle) {
@@ -522,21 +525,38 @@
         if (!/body/i.test(settings.$target.selector)) {
 
           if (methods.bottom()) {
+
+            //if tip goes off the right of the screen, move it left
+            if(settings.$target.offset().left + settings.$next_tip.width() > window.outerWidth){
+              theLeft = window.outerWidth - settings.$next_tip.width() - settings.edgePadding;
+              offset = settings.$target.offset().left - theLeft;
+            }
+            else
+              theLeft = settings.$target.offset().left;
+
             settings.$next_tip.css({
               top: (settings.$target.offset().top + nub_height + settings.$target.outerHeight()),
-              left: settings.$target.offset().left
+              left: theLeft
             });
 
-            methods.nub_position($nub, settings.tipSettings.nubPosition, 'top');
+            methods.nub_position($nub, settings.tipSettings.nubPosition, 'top', offset);
 
           } else if (methods.top()) {
 
+            //if tip goes off the right of the screen, move it left
+            if(settings.$target.offset().left + settings.$next_tip.width() > window.outerWidth){
+              theLeft = window.outerWidth - settings.$next_tip.width() - settings.edgePadding;
+              offset = settings.$target.offset().left - theLeft;
+            }
+            else
+              theLeft = settings.$target.offset().left;
+
             settings.$next_tip.css({
               top: (settings.$target.offset().top - settings.$next_tip.outerHeight() - nub_height),
-              left: settings.$target.offset().left
+              left: theLeft
             });
 
-            methods.nub_position($nub, settings.tipSettings.nubPosition, 'bottom');
+            methods.nub_position($nub, settings.tipSettings.nubPosition, 'bottom', offset);
 
           } else if (methods.right()) {
 
@@ -843,11 +863,14 @@
         return true;
       },
 
-      nub_position: function (nub, pos, def) {
+      nub_position: function (nub, pos, def, offset) {
         if (pos === 'auto') {
           nub.addClass(def);
         } else {
           nub.addClass(pos);
+        }
+        if(typeof offset !== 'undefined' && parseInt(offset, 10)){
+          nub.css('left', parseInt(nub.css('left').replace('px',''), 10) + parseInt(offset, 10) + 'px');
         }
       },
 
