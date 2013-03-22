@@ -155,18 +155,20 @@
             });
 
             settings.$window.bind('resize.joyride', function (e) {
-              if (settings.exposed && settings.exposed.length > 0) {
-                var $els = $(settings.exposed);
-                $els.each(function () {
-                  var $this = $(this);
-                  methods.un_expose($this);
-                  methods.expose($this);
-                });
-              }
-              if (methods.is_phone()) {
-                methods.pos_phone();
-              } else {
-                methods.pos_default();
+              if(typeof settings.$li !== 'undefined'){
+                if (settings.exposed && settings.exposed.length > 0) {
+                  var $els = $(settings.exposed);
+                  $els.each(function () {
+                    var $this = $(this);
+                    methods.un_expose($this);
+                    methods.expose($this);
+                  });
+                }
+                if (methods.is_phone()) {
+                  methods.pos_phone();
+                } else {
+                  methods.pos_default();
+                }
               }
             });
           } else {
