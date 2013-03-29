@@ -46,7 +46,8 @@
       'exposeCover': '<div class="joyride-expose-cover"></div>',
       'prevButton': '<a href="#" class="joyride-prev-tip"></a>',
       'nextButton': '<a href="#" class="joyride-next-tip"></a>',
-      'doneButton': '<a href="#" class="joyride-done-tip"></a>'
+      'doneButton': '<a href="#" class="joyride-done-tip"></a>',
+      'buttonContainer': '<div class="joyride-button-container"></div>'
     }
   },
 
@@ -199,18 +200,21 @@
       },
 
       tip_template: function (opts) {
-        var $blank, content, $wrapper;
+        var $blank, content, $wrapper, $buttonWrapper, $buttons;
 
         opts.tip_class = opts.tip_class || '';
 
         $blank = $(settings.template.tip).addClass(opts.tip_class);
-        content = $.trim($(opts.li).html()) +
-          methods.prev_button_text(opts.prev_button_text, opts.index) +
-          methods.next_button_text(opts.next_button_text) +
-          '<div style="clear: both;"></div>' +
-          methods.done_button_text(opts.done_button_text) +
-          settings.template.link +
-          methods.timer_instance(opts.index);
+        $buttons = $(settings.template.buttonContainer).append(
+            methods.prev_button_text(opts.prev_button_text, opts.index) +
+            methods.next_button_text(opts.next_button_text) +
+            '<div style="clear: both;"></div>' +
+            methods.done_button_text(opts.done_button_text) +
+            settings.template.link +
+            methods.timer_instance(opts.index)
+        );
+        $buttonWrapper = $('<div/>').append($buttons);
+        content = $.trim($(opts.li).html()) + $buttonWrapper.html();
 
         $wrapper = $(settings.template.wrapper);
         if (opts.li.attr('data-aria-labelledby')) {
