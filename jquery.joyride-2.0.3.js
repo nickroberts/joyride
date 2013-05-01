@@ -533,8 +533,8 @@
           if (methods.bottom()) {
 
             //if tip goes off the right of the screen, move it left
-            if(settings.$target.offset().left + settings.$next_tip.width() > window.outerWidth){
-              theLeft = window.outerWidth - settings.$next_tip.width() - settings.edgePadding;
+            if(settings.$target.offset().left + settings.$next_tip.outerWidth() > window.outerWidth){
+              theLeft = window.outerWidth - settings.$next_tip.outerWidth() - settings.edgePadding;
               offset = settings.$target.offset().left - theLeft;
             }
             else
@@ -550,8 +550,8 @@
           } else if (methods.top()) {
 
             //if tip goes off the right of the screen, move it left
-            if(settings.$target.offset().left + settings.$next_tip.width() > window.outerWidth){
-              theLeft = window.outerWidth - settings.$next_tip.width() - settings.edgePadding;
+            if(settings.$target.offset().left + settings.$next_tip.outerWidth() > window.outerWidth){
+              theLeft = window.outerWidth - settings.$next_tip.outerWidth() - settings.edgePadding;
               offset = settings.$target.offset().left - theLeft;
             }
             else
@@ -571,9 +571,17 @@
               left: (settings.$target.outerWidth() + settings.$target.offset().left + nub_width)
             });
 
+            if((settings.$next_tip.offset().left + settings.$next_tip.outerWidth() + nub_width + settings.edgePadding) > window.outerWidth){
+              settings.$next_tip.outerWidth(settings.$next_tip.outerWidth() - settings.edgePadding);
+            }
+
             methods.nub_position($nub, settings.tipSettings.nubPosition, 'left');
 
           } else if (methods.left()) {
+
+            if((settings.$target.offset().left - (settings.$next_tip.outerWidth() + nub_width + settings.edgePadding)) < 0){
+              settings.$next_tip.outerWidth(settings.$target.offset().left - nub_width - settings.edgePadding);
+            }
 
             settings.$next_tip.css({
               top: settings.$target.offset().top,
