@@ -156,7 +156,7 @@
             });
 
             settings.$window.bind('resize.joyride', function (e) {
-              if(typeof settings.$li !== 'undefined'){
+              if(typeof settings.$current_tip !== 'undefined' && settings.$current_tip.is(':visible') && typeof settings.$li !== 'undefined'){
                 if (settings.exposed && settings.exposed.length > 0) {
                   var $els = $(settings.exposed);
                   $els.each(function () {
