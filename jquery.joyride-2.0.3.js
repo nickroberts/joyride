@@ -533,7 +533,7 @@
           if (methods.bottom()) {
 
             //if tip goes off the right of the screen, move it left
-            if(settings.$target.offset().left + settings.$next_tip.outerWidth() > window.outerWidth){
+            if(settings.$target.offset().left + settings.$next_tip.outerWidth() + settings.edgePadding > window.outerWidth){
               theLeft = window.outerWidth - settings.$next_tip.outerWidth() - settings.edgePadding;
               offset = settings.$target.offset().left - theLeft;
             }
@@ -550,7 +550,7 @@
           } else if (methods.top()) {
 
             //if tip goes off the right of the screen, move it left
-            if(settings.$target.offset().left + settings.$next_tip.outerWidth() > window.outerWidth){
+            if(settings.$target.offset().left + settings.$next_tip.outerWidth() + settings.edgePadding > window.outerWidth){
               theLeft = window.outerWidth - settings.$next_tip.outerWidth() - settings.edgePadding;
               offset = settings.$target.offset().left - theLeft;
             }
